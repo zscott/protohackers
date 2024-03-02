@@ -53,6 +53,7 @@ defmodule SmokeTest.EchoServer do
       {:ok, data} ->
         Logger.info("Sending data: #{inspect(data)}")
         :gen_tcp.send(socket, data)
+
       {:error, reason} ->
         Logger.error("Failed to receive data: #{inspect(reason)}")
     end
@@ -62,6 +63,7 @@ defmodule SmokeTest.EchoServer do
 
   defp recv_until_closed(socket, buffer) do
     Logger.info("recv_until_closed(#{inspect(buffer)})")
+
     case :gen_tcp.recv(socket, 0, 5_000) do
       {:ok, data} ->
         recv_until_closed(socket, [buffer, data])
