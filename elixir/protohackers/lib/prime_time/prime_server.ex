@@ -23,7 +23,9 @@ defmodule PrimeTime.PrimeServer do
       mode: :binary,
       active: false,
       reuseaddr: true,
-      exit_on_close: false
+      exit_on_close: false,
+      packet: :line,
+      buffer: 1024 * 100
     ]
 
     case :gen_tcp.listen(@port, listen_options) do
@@ -52,9 +54,9 @@ defmodule PrimeTime.PrimeServer do
   defp handle_connection(socket) do
     Logger.info(@name <> " accepted connection")
 
-    case recv_until_closed(socket, _buffer = "") do
-      {:ok, data} ->
-        :gen_tcp.send(socket, data)
+    case recv_until_closed(socket) do
+      :ok ->
+        Logger.info(@name <> " closed connection")
 
       {:error, reason} ->
         Logger.error(@name <> " Failed to receive data: #{inspect(reason)}")
@@ -63,13 +65,15 @@ defmodule PrimeTime.PrimeServer do
     :gen_tcp.close(socket)
   end
 
-  defp recv_until_closed(socket, buffer) do
+  defp recv_until_closed(socket) do
     case :gen_tcp.recv(socket, 0, 5_000) do
-      {:ok, data} ->
-        recv_until_closed(socket, [buffer, data])
+      {:ok, line} ->
+        Logger.info(@name <> " received data: #{inspect(line)}")
+        :gen_tcp.send(socket, line)
+        recv_until_closed(socket)
 
       {:error, :closed} ->
-        {:ok, buffer}
+        :ok
 
       {:error, reason} ->
         {:error, reason}
