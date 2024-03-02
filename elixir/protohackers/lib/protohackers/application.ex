@@ -1,4 +1,4 @@
-defmodule SmokeTest.Application do
+defmodule Protohackers.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,14 +8,13 @@ defmodule SmokeTest.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      SmokeTest.EchoServer
-      # Starts a worker by calling: SmokeTest.Worker.start_link(arg)
-      # {SmokeTest.Worker, arg}
+      SmokeTest.EchoServer,
+      PrimeTime.PrimeServer,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: SmokeTest.Supervisor]
+    opts = [strategy: :one_for_one, name: Protohackers.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

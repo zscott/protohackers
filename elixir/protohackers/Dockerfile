@@ -86,13 +86,13 @@ RUN chown nobody /app
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/smoke_test ./
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/protohackers ./
 
 USER nobody
 
 RUN ls -la /app
 
-CMD ["/app/bin/smoke_test", "start"]
+CMD ["/app/bin/protohackers", "start"]
 # Appended by flyctl
-ENV ECTO_IPV6 true
-ENV ERL_AFLAGS "-proto_dist inet6_tcp"
+# ENV ECTO_IPV6 true
+# ENV ERL_AFLAGS "-proto_dist inet6_tcp"

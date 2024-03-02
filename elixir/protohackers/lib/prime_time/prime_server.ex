@@ -1,10 +1,13 @@
-defmodule SmokeTest.EchoServer do
+defmodule PrimeTime.PrimeServer do
   @moduledoc """
   A simple TCP echo server that responds to any message with the same message.
   """
   use GenServer
 
   require Logger
+
+  @name "PrimeServer"
+  @port 11001
 
   def start_link([] = _opts) do
     GenServer.start_link(__MODULE__, :no_state)
@@ -14,7 +17,7 @@ defmodule SmokeTest.EchoServer do
 
   @impl true
   def init(:no_state) do
-    Logger.info("Starting echo server")
+    Logger.info("Starting " <> @name)
 
     listen_options = [
       mode: :binary,
@@ -23,9 +26,9 @@ defmodule SmokeTest.EchoServer do
       exit_on_close: false
     ]
 
-    case :gen_tcp.listen(5001, listen_options) do
+    case :gen_tcp.listen(@port, listen_options) do
       {:ok, listen_socket} ->
-        Logger.info("Echo server listening on port 5001")
+        Logger.info(@name <> " listening on port " <> Integer.to_string(@port))
         state = %__MODULE__{listen_socket: listen_socket}
         {:ok, state, {:continue, :accept}}
 
@@ -47,23 +50,20 @@ defmodule SmokeTest.EchoServer do
   end
 
   defp handle_connection(socket) do
-    Logger.info("Echo server accepted connection")
+    Logger.info(@name <> " accepted connection")
 
     case recv_until_closed(socket, _buffer = "") do
       {:ok, data} ->
-        Logger.info("Sending data: #{inspect(data)}")
         :gen_tcp.send(socket, data)
 
       {:error, reason} ->
-        Logger.error("Failed to receive data: #{inspect(reason)}")
+        Logger.error(@name <> " Failed to receive data: #{inspect(reason)}")
     end
 
     :gen_tcp.close(socket)
   end
 
   defp recv_until_closed(socket, buffer) do
-    Logger.info("recv_until_closed(#{inspect(buffer)})")
-
     case :gen_tcp.recv(socket, 0, 5_000) do
       {:ok, data} ->
         recv_until_closed(socket, [buffer, data])
